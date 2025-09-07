@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14
+    container_name: tickets_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ekaterinariadcikova
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: tickets_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tickets_api
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_URL: postgresql://ekaterinariadcikova:password@postgres:5432/tickets_db
+      SECRET_KEY: secret123
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    ports:
+      - "44445:44445"
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
